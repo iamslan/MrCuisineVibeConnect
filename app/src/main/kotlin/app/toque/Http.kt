@@ -10,7 +10,7 @@ import java.net.URL
 object Http {
     class Response(val body: String, val serverMs: Long)
 
-    var userAgent = "Toque (Android; +https://github.com/Wuki60/MrCuisineVibeConnect)"
+    var userAgent = "Toque (Android; +https://github.com/iamslan/MrCuisineVibeConnect)"
 
     /** Heure du serveur (en-tête Date) quel que soit le code de réponse ; 0 si absente. */
     fun serverDate(url: String, timeoutMs: Int = 8_000): Long {

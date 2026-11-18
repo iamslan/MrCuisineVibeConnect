@@ -20,7 +20,7 @@ import javax.net.ssl.X509TrustManager
  * assets/certs contient aussi les racines vers lesquelles les sites utilisés basculent ou
  * basculeront, toutes absentes d'Android 6 : ISRG Root X2 (Let's Encrypt, ECDSA), Sectigo
  * Public Server Authentication Root E46 et R46 (GitHub, aujourd'hui encore contre-signées par
- * USERTrust) et GTS Root R1 à R4 (Google). Copiées du magasin de racines de macOS ; une racine
+ * USERTrust) et GTS Root R1, R3 et R4 (Google ; R2 a quitté la liste de Mozilla). Copiées du magasin de racines de macOS ; une racine
  * de plus = un fichier PEM de plus dans ce dossier.
  *
  * Le système reste consulté en premier ; les racines embarquées ne servent que s'il refuse.

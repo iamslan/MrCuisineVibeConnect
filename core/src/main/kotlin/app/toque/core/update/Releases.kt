@@ -15,7 +15,9 @@ data class Release(
 
 /** Lecture de l'API GitHub « dernière version » et comparaison de numéros de version. */
 object Releases {
-    const val REPO = "Wuki60/MrCuisineVibeConnect"
+    // Fork iamslan : les mises à jour viennent uniquement des versions publiées sur ce fork,
+    // jamais du dépôt d'origine (Wuki60), qui écraserait les changements propres au fork.
+    const val REPO = "iamslan/MrCuisineVibeConnect"
     const val LATEST_URL = "https://api.github.com/repos/$REPO/releases/latest"
     const val PAGE_URL = "https://github.com/$REPO/releases"
 

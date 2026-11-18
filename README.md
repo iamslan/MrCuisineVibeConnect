@@ -1,5 +1,10 @@
 # MrCuisineVibeConnect
 
+> **Fork `iamslan/MrCuisineVibeConnect`.** Based on [pierok13's `pierok13-all` branch](https://github.com/pierok13/MrCuisineVibeConnect/tree/pierok13-all), plus:
+> the bowl sensor is read inverted by default on the real machine (Settings › Safety can turn it off),
+> a bowl below the board's 37 °C first step shows `< 37 °C` instead of `0 °C`,
+> and Settings › Updates only looks at **this fork's** releases, never the original repository's.
+
 🇫🇷 **[Version française](README.fr.md)**
 
 **Toque** is a fast, modern replacement interface for the Lidl **Monsieur Cuisine Connect**
