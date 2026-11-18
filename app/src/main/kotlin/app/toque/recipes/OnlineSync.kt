@@ -57,17 +57,19 @@ class OnlineSync(private val context: Context, private val prefs: Prefs, private
 
         // 1. Liste complète (résumés).
         progress(tr("Liste des recettes…"))
+        // Recettes du smart et de la communauté en plus, si le réglage est activé (voir McOnline.Entry.wanted).
+        val extra = prefs.extraRecipes
         val entries = ArrayList<McOnline.Entry>()
         var page = 1
         var pages = 1
         while (page <= pages) {
             val p = try {
-                McOnline.parsePage(get(McOnline.listUrl(page), language))
+                McOnline.parsePage(get(McOnline.listUrl(page, extra), language))
             } catch (e: IOException) {
                 return LidlSync.Report(false, tr("Serveur de recettes injoignable : %s", e.message ?: e.toString()))
             }
             pages = p.totalPages.coerceIn(1, 1000)
-            entries += p.entries
+            entries += p.entries.filter { it.wanted(extra) }
             progress(tr("Liste des recettes… %d / %d", page, pages))
             page++
             pause(300)

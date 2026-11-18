@@ -458,5 +458,10 @@
   "Étapes": "Steps",
   "Étapes %d à %d · %s": "Steps %d to %d · %s",
   "écriture impossible": "write failed",
-  "… et %d autres": "… and %d more"
+  "… et %d autres": "… and %d more",
+  "Communauté": "Community",
+  "Monsieur Cuisine smart": "Monsieur Cuisine smart",
+  "Recette écrite pour le Monsieur Cuisine smart : vérifiez les quantités et les réglages avant de lancer.": "Recipe written for the Monsieur Cuisine smart: check the quantities and settings before starting.",
+  "Recettes du smart et de la communauté": "Smart and community recipes",
+  "En plus des recettes officielles du connect : celles du Monsieur Cuisine smart, et celles de la communauté notées au moins %s sur 5 par au moins %d personnes. Prend effet à la prochaine synchronisation.": "On top of the official connect recipes: those of the Monsieur Cuisine smart, and community recipes rated at least %s out of 5 by at least %d people. Takes effect at the next sync."
 }

@@ -16,6 +16,7 @@ import app.toque.Prefs
 import app.toque.TimeSync
 import app.toque.core.i18n.I18n
 import app.toque.core.i18n.tr
+import app.toque.core.recipes.McOnline
 import app.toque.core.machine.RootShell
 import app.toque.core.machine.Snapshot
 import app.toque.core.time.ZoneLookup
@@ -160,6 +161,9 @@ class SettingsScreen(a: MainActivity) : Screen(a) {
         lidl.addView(Ui.button(c, tr("Ouvrir l'appli d'origine"), Ui.Style.GHOST, Icon.Kind.LINK, height = 52) { a.openVendorApp() },
             Ui.lp(Ui.WRAP, Ui.WRAP, t = 8))
         lidl.addView(toggle(tr("Synchro automatique chaque nuit"), a.prefs.autoSync) { a.prefs.autoSync = it }, Ui.lp(t = 10))
+        lidl.addView(toggle(tr("Recettes du smart et de la communauté"), a.prefs.extraRecipes) { a.prefs.extraRecipes = it }, Ui.lp(t = 10))
+        lidl.addView(Ui.text(c, tr("En plus des recettes officielles du connect : celles du Monsieur Cuisine smart, et celles de la communauté notées au moins %s sur 5 par au moins %d personnes. Prend effet à la prochaine synchronisation.",
+            "4,5", McOnline.MIN_MEMBER_RATINGS), 15f, Ui.TEXT3).apply { setLineSpacing(0f, 1.1f) }, Ui.lp(t = 6))
 
         // ---- Mises à jour
         val updates = section(left, tr("Mises à jour"), Icon.Kind.INFO)

@@ -4,6 +4,7 @@ import app.toque.core.recipes.McOnline
 import app.toque.core.recipes.RecipeCodec
 import app.toque.core.recipes.StepProgram
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -131,11 +132,68 @@ class McOnlineTest {
         assertNotNull(McOnline.parseRecipe("""{"data":{"recipe":{"id":"2","name":"Vide"}}}"""))
     }
 
+    @Test fun extraRecipesAreKeptOnlyWhenAskedAndGoodEnough() {
+        fun e(source: String, devices: List<String>, rating: Double = 0.0, count: Int = 0) =
+            McOnline.Entry(1, "", "x", rating = rating, ratingCount = count, source = source, devices = devices)
+        val connect = listOf("MC2.0", "MC3.0")
+        val smart = listOf("MC3.0")
+        // Officielles du connect : toujours.
+        assertTrue(e("official", connect).wanted(false))
+        assertTrue(e("official", connect).wanted(true))
+        // Officielles du smart : seulement avec les recettes en plus.
+        assertFalse(e("official", smart).wanted(false))
+        assertTrue(e("official", smart).wanted(true))
+        // Communauté : avec les recettes en plus, et bien notées par assez de monde.
+        assertFalse(e("member", connect, 4.9, 900).wanted(false))
+        assertTrue(e("member", connect, 4.5, 50).wanted(true))
+        assertTrue(e("member", smart, 4.8, 602).wanted(true))
+        assertFalse(e("member", smart, 4.4, 5000).wanted(true))
+        assertFalse(e("member", smart, 5.0, 49).wanted(true))
+        // Anciens robots sans réglages machine : jamais.
+        assertFalse(e("official", listOf("MC1.1")).wanted(true))
+        assertFalse(e("member", listOf("MC0.5"), 5.0, 9000).wanted(true))
+    }
+
+    @Test fun listEntriesCarrySourceAndDevices() {
+        val p = McOnline.parsePage(
+            """{"data":{"total":2,"totalPage":1,"recipes":[
+                {"id":1,"name":"A","source":"member","deviceTypes":["MC3.0"],"rating":4.8,"totalRating":602},
+                {"id":2,"name":"B","deviceType":"MC2.0"}]}}""",
+        )
+        assertEquals("member", p.entries[0].source)
+        assertEquals(listOf("MC3.0"), p.entries[0].devices)
+        assertFalse(p.entries[0].forConnect)
+        assertTrue(p.entries[0].wanted(true))
+        // Sans indication : une recette officielle, pour le robot annoncé.
+        assertTrue(p.entries[1].official)
+        assertTrue(p.entries[1].forConnect)
+    }
+
+    @Test fun smartAndCommunityRecipesAreLabelled() {
+        val smart = McOnline.parseRecipe(
+            """{"data":{"recipe":{"id":7,"name":"Crêpes","source":"member","deviceTypes":["MC3.0"]}}}""",
+        )!!
+        assertTrue(smart.tags.contains("Communauté"))
+        assertTrue(smart.tags.contains("Monsieur Cuisine smart"))
+        assertTrue(smart.notes.contains("Monsieur Cuisine smart"))
+        val connect = McOnline.parseRecipe(
+            """{"data":{"recipe":{"id":8,"name":"Soupe","source":"official","deviceTypes":["MC2.0","MC3.0"]}}}""",
+        )!!
+        assertTrue(connect.tags.isEmpty())
+        assertEquals("", connect.notes)
+    }
+
     @Test fun headersAndUrls() {
         assertEquals("web", McOnline.headers("fr-FR")["device-type"])
         assertEquals("fr-FR", McOnline.languageFor("fr"))
         assertEquals("en-US", McOnline.languageFor("en"))
         assertTrue(McOnline.listUrl(2).contains("/page/2/size/100?"))
         assertTrue(McOnline.listUrl(1).contains("MC2.0"))
+        // Par défaut : les officielles du connect seulement. Avec les recettes en plus : connect et smart, toutes sources.
+        assertTrue(McOnline.listUrl(1).contains("source%5D%5B%5D=official"))
+        assertFalse(McOnline.listUrl(1).contains("MC3.0"))
+        assertTrue(McOnline.listUrl(1, extra = true).contains("MC2.0"))
+        assertTrue(McOnline.listUrl(1, extra = true).contains("MC3.0"))
+        assertFalse(McOnline.listUrl(1, extra = true).contains("source"))
     }
 }

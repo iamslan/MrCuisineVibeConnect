@@ -80,6 +80,16 @@ class Prefs(context: Context) {
             p.edit().putBoolean("invertBowl", v).commit()
         }
 
+    /**
+     * Synchro : en plus des recettes officielles du connect, celles du Monsieur Cuisine smart et
+     * celles de la communauté bien notées (même site, mêmes réglages machine).
+     */
+    var extraRecipes: Boolean
+        get() = p.getBoolean("extraRecipes", true)
+        set(v) {
+            p.edit().putBoolean("extraRecipes", v).commit()
+        }
+
     /** Montée progressive de la vitesse quand le contenu est chaud (≥ 60 °C). */
     var hotRamp: Boolean
         get() = p.getBoolean("hotRamp", true)

@@ -21,6 +21,12 @@ object McOnline {
     const val API = "https://mc-api.tecpal.com"
     /** Monsieur Cuisine connect. */
     const val DEVICE = "MC2.0"
+    /** Monsieur Cuisine smart : mêmes programmes pour l'essentiel, recettes en plus (voir [Entry.wanted]). */
+    const val DEVICE_SMART = "MC3.0"
+    const val SOURCE_OFFICIAL = "official"
+    /** Recettes de la communauté : gardées seulement si elles sont bien notées par assez de monde. */
+    const val MIN_MEMBER_RATING = 4.5
+    const val MIN_MEMBER_RATINGS = 50
     const val PAGE_SIZE = 100
     /** Version de la lecture des fiches : à augmenter quand elle change, pour que la synchro les relise toutes. */
     const val PARSER = 2
@@ -31,8 +37,13 @@ object McOnline {
     fun headers(language: String): Map<String, String> =
         linkedMapOf("Accept" to "application/json", "Accept-Language" to language, "device-type" to "web")
 
-    fun listUrl(page: Int): String =
-        "$API/api/v2/recipes/page/$page/size/$PAGE_SIZE?filters%5BdeviceTypes%5D%5B%5D=$DEVICE&filters%5Bsource%5D%5B%5D=official"
+    /**
+     * Liste des recettes. Sans [extra] : les recettes officielles du connect. Avec : tout ce qui est
+     * publié pour le connect ou le smart, communauté comprise (le tri se fait avec [Entry.wanted]).
+     */
+    fun listUrl(page: Int, extra: Boolean = false): String =
+        if (extra) "$API/api/v2/recipes/page/$page/size/$PAGE_SIZE?filters%5BdeviceTypes%5D%5B%5D=$DEVICE&filters%5BdeviceTypes%5D%5B%5D=$DEVICE_SMART"
+        else "$API/api/v2/recipes/page/$page/size/$PAGE_SIZE?filters%5BdeviceTypes%5D%5B%5D=$DEVICE&filters%5Bsource%5D%5B%5D=$SOURCE_OFFICIAL"
 
     fun recipeUrl(apiId: Long): String = "$API/api/v2/recipes/$apiId"
 
@@ -59,7 +70,25 @@ object McOnline {
         val author: String = "",
         val rating: Double = 0.0,
         val ratingCount: Int = 0,
+        /** « official » ou « member » (communauté). */
+        val source: String = SOURCE_OFFICIAL,
+        /** Robots pour lesquels la recette est publiée (« MC2.0 » : connect, « MC3.0 » : smart). */
+        val devices: List<String> = listOf(DEVICE),
     ) {
+        val official: Boolean get() = source == SOURCE_OFFICIAL
+        val forConnect: Boolean get() = DEVICE in devices
+
+        /**
+         * Recette à garder. Toujours : les officielles du connect. Avec [extra] : aussi les officielles
+         * du smart, et celles de la communauté (connect ou smart) notées au moins
+         * [MIN_MEMBER_RATING] par au moins [MIN_MEMBER_RATINGS] personnes.
+         */
+        fun wanted(extra: Boolean): Boolean {
+            if (official && forConnect) return true
+            if (!extra || (!forConnect && DEVICE_SMART !in devices)) return false
+            return official || (rating >= MIN_MEMBER_RATING && ratingCount >= MIN_MEMBER_RATINGS)
+        }
+
         /** Empreinte enregistrée dans l'index de synchro : fiche modifiée, ou seulement sa note. */
         val stamp: String get() = "$updated|${ratingText(rating)}|$ratingCount|$author"
     }
@@ -88,6 +117,8 @@ object McOnline {
                 author = r["author"].obj().str("name")?.trim().orEmpty(),
                 rating = (r.double("rating") ?: 0.0).coerceIn(0.0, 5.0),
                 ratingCount = (r.int("totalRating") ?: 0).coerceAtLeast(0),
+                source = r.str("source")?.trim()?.lowercase().orEmpty().ifEmpty { SOURCE_OFFICIAL },
+                devices = r["deviceTypes"].list().mapNotNull { it as? String }.ifEmpty { listOfNotNull(r.str("deviceType")) },
             )
         }
         return Page(d.int("total") ?: entries.size, d.int("totalPage") ?: 1, entries)
@@ -120,12 +151,22 @@ object McOnline {
         val steps = steps(size["steps"].list().map { it.obj() })
         if (steps.isEmpty()) plain(size.str("instruction"))?.let { notes += it }
 
+        // Origine, visible dans les étiquettes (et donc dans la recherche) : communauté, smart.
+        val origin = ArrayList<String>()
+        val devices = r["deviceTypes"].list().mapNotNull { it as? String }
+        val member = r.str("source")?.trim()?.lowercase().let { it != null && it.isNotEmpty() && it != SOURCE_OFFICIAL }
+        if (member) origin += tr("Communauté")
+        if (devices.isNotEmpty() && DEVICE !in devices) {
+            origin += tr("Monsieur Cuisine smart")
+            notes += tr("Recette écrite pour le Monsieur Cuisine smart : vérifiez les quantités et les réglages avant de lancer.")
+        }
+
         val thumb = r["thumbnail"].obj().str("landscape") ?: r["detailsImage"].obj().str("landscape")
         return Recipe(
             id = toqueId(apiId),
             title = title,
             category = categories.firstOrNull().orEmpty(),
-            tags = (categories.drop(1) + tags).distinct(),
+            tags = (categories.drop(1) + tags + origin).distinct(),
             servings = amount,
             prepMinutes = r.int("preparationDuration") ?: 0,
             totalMinutes = r.int("duration") ?: 0,
