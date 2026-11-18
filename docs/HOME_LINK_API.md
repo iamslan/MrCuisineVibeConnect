@@ -206,3 +206,26 @@ empty. `text` is the ready-to-display line for a shopping list.
 ### GET /api/recipes/{id}/image
 
 The recipe's photo as `image/jpeg`, or `404` when the robot has none.
+
+## Precisions
+
+- **Error codes.** `bad_request` (400), `unauthorized` (401), `not_found` (404), and for pairing
+  `bad_code`, `pairing_closed` (403) and `too_many_attempts` (429). A request other than `GET`
+  on a data endpoint gets `400 bad_request`: the API is read-only.
+- **Pairing.** The `id` returned by `/api/pair` is the `id` of `/api/info`. Any wrong code counts
+  as one of the 5 attempts, whatever its length.
+- **Unpairing.** "Unpair all devices" also closes the event streams that are open.
+- **Countdown.** A `status` event is not sent every second, so `job.remaining` in the stream can
+  be up to 30 seconds old: use `job.ends_at` for a countdown.
+- **Top-level `speed` and `target_temperature`** are what the machine is doing now (0 and `null`
+  when idle); `job.speed` and `job.target_temperature` are what the program asks for.
+- **Faults.** `state` is `fault` exactly when `fault` is not `null`. `link` is never `fault` in
+  this version: a lost link shows as `offline`.
+- **Free-text fields.** `job_paused.reason` and `job_aborted.reason` are sentences in the robot's
+  language. `job.pause_reason` is `user`, `lid` or `safety`; `job.accessory` is `blade` or
+  `whisk`; `fault.code` is a short lower-case identifier.
+- **Recipe ids** contain letters, digits and `-` (`web-250008`, `mc-1234`). `category` is an
+  exact match on a name from `/api/categories`.
+- **Discovery** carries no TXT record in this version: read `/api/info` to identify the robot.
+- **Versions.** `api` is a whole number, raised only for incompatible changes. Fields may be
+  added without raising it: clients ignore what they do not know.
