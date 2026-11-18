@@ -4,6 +4,8 @@
 > the bowl sensor is read inverted by default on the real machine (Settings › Safety can turn it off),
 > a bowl below the board's 37 °C first step shows `< 37 °C` instead of `0 °C`,
 > the recipe sync also brings the Monsieur Cuisine smart recipes and well-rated community recipes (Settings › Lidl recipes can turn this off),
+> a first-launch assistant checks this robot's bowl sensor and rotary knob instead of assuming a model,
+> an optional, read-only **home link** shows the robot's state, cooking events and recipes to Home Assistant ([docs/HOME_LINK_API.md](docs/HOME_LINK_API.md)),
 > and Settings › Updates only looks at **this fork's** releases, never the original repository's.
 
 🇫🇷 **[Version française](README.fr.md)**
