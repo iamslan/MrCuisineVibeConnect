@@ -114,8 +114,12 @@ class TempRing(c: Context) : View(c) {
     private val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { textAlign = Paint.Align.CENTER }
     private val r = RectF()
 
-    fun set(actual: Int, target: Int, rpmLevel: Int) {
-        if (actual == this.actual && target == this.target && rpmLevel == this.rpmLevel) return
+    /** Texte au centre quand il diffère de la valeur (« < 37 » sous le premier palier de la base). */
+    var label: String? = null
+
+    fun set(actual: Int, target: Int, rpmLevel: Int, label: String? = null) {
+        if (actual == this.actual && target == this.target && rpmLevel == this.rpmLevel && label == this.label) return
+        this.label = label
         this.actual = actual
         this.target = target
         this.rpmLevel = rpmLevel
@@ -146,8 +150,9 @@ class TempRing(c: Context) : View(c) {
         }
         text.typeface = Ui.THIN
         text.color = Ui.TEXT
-        text.textSize = size * 0.30f
-        canvas.drawText("$actual°", cx + size * 0.03f, cy + size * 0.08f, text)
+        val shown = label
+        text.textSize = size * (if (shown != null) 0.24f else 0.30f)
+        canvas.drawText("${shown ?: actual}°", cx + size * 0.03f, cy + size * 0.08f, text)
         text.typeface = Ui.REGULAR
         text.color = Ui.TEXT2
         text.textSize = size * 0.075f

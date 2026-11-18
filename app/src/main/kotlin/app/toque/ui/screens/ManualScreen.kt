@@ -230,7 +230,7 @@ class ManualScreen(a: MainActivity, preset: app.toque.core.recipes.StepMachine? 
 
     override fun onSnapshot(s: Snapshot) {
         ring.set(if (s.hasSample) s.actualTempC else 0, if (s.jobActive && s.jobTempLevel > 0) Mcc.celsiusForLevel(s.jobTempLevel) else
-            if (tempLevel > 0) Mcc.celsiusForLevel(tempLevel) else 0, s.speedLevel)
+            if (tempLevel > 0) Mcc.celsiusForLevel(tempLevel) else 0, s.speedLevel, if (s.tempBelowRange) s.tempText else null)
         weight.text = if (s.hasSample) tr("Balance : %d g", s.weightG) else tr("Base non connectée")
         val manualJob = s.kind?.name == "MANUAL" && (s.state == JobState.RUNNING || s.state == JobState.STARTING || s.state == JobState.PAUSED)
         live = manualJob && s.state != JobState.PAUSED

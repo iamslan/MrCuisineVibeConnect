@@ -15,6 +15,7 @@ import app.toque.core.machine.Phase
 import app.toque.core.machine.Programs
 import app.toque.core.machine.SafetyPolicy
 import app.toque.core.machine.Setting
+import app.toque.core.machine.Snapshot
 import app.toque.core.machine.SimBoard
 import app.toque.core.protocol.Direction
 import app.toque.core.protocol.Mcc
@@ -107,6 +108,22 @@ class ControllerTest {
         val v = b.c.startJob(Programs.manual(3, 0, Direction.CLOCKWISE, 5_000))
         assertFalse(v.ok)
         assertTrue(v.has("lid"))
+    }
+
+    @Test fun temperatureBelowTheFirstStepIsShownAsBelow37() {
+        // La base envoie 0 tant que le bol est sous 37 °C, puis la vraie valeur.
+        val cold = Snapshot(hasSample = true, actualTempC = 0)
+        assertTrue(cold.tempBelowRange)
+        assertEquals("< 37", cold.tempText)
+        assertFalse(cold.hot)
+        val warm = Snapshot(hasSample = true, actualTempC = 37)
+        assertFalse(warm.tempBelowRange)
+        assertEquals("37", warm.tempText)
+        // La base simulée envoie de vraies valeurs basses : elles restent affichées telles quelles.
+        val demo = Snapshot(hasSample = true, actualTempC = 22)
+        assertFalse(demo.tempBelowRange)
+        assertEquals("22", demo.tempText)
+        assertFalse(Snapshot(hasSample = false).tempBelowRange)
     }
 
     @Test fun requiredBowlRefusesToStartWithoutIt() {

@@ -82,7 +82,10 @@ object Mcc {
         85, 90, 95, 100, 105, 110, 115, 120, 125, 130,
     )
 
-    private val ERROR_MAP = mapOf(1 to 1, 3 to 2, 4 to 3, 5 to 4, 6 to 5, 7 to 12, 8 to 13)
+    /** Plus basse température que la base sait mesurer (premier palier) ; en dessous elle envoie 0. */
+    const val MIN_MEASURED_C = 37
+
+    private val ERROR_MAP =mapOf(1 to 1, 3 to 2, 4 to 3, 5 to 4, 6 to 5, 7 to 12, 8 to 13)
 
     fun celsiusForLevel(level: Int): Int = TEMPERATURE_LEVELS[level.coerceIn(0, 19)]
 

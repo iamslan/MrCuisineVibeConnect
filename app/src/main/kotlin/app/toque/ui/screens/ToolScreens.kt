@@ -61,7 +61,7 @@ class DiagnosticsScreen(a: MainActivity) : Screen(a) {
             append(tr("Alerte").padEnd(17)).append(s.faultMessage.ifEmpty { tr("aucune") }).append('\n')
             append(tr("Moteur / chauffe").padEnd(17)).append(yn(s.motorOn)).append(" / ").append(yn(s.heaterOn)).append('\n')
             append(tr("Régime").padEnd(17)).append(s.rpm).append(" ").append(tr("tr/min (niveau %d)", s.speedLevel)).append("\n")
-            append(tr("Température").padEnd(17)).append(s.actualTempC).append(" ").append(tr("°C (consigne %d °C)", s.targetTempC)).append("\n")
+            append(tr("Température").padEnd(17)).append(s.tempText).append(" ").append(tr("°C (consigne %d °C)", s.targetTempC)).append("\n")
             append(tr("Poids").padEnd(17)).append(s.weightG).append(" g · ").append(s.scaleState).append(if (s.scaleStable) " · " + tr("stable") else "").append('\n')
             append(tr("Couvercle ouvert").padEnd(17)).append(yn(s.lidOpen)).append('\n')
             append(tr("Bol détecté").padEnd(17)).append(yn(s.bowlDetected)).append('\n')

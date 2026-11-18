@@ -1,5 +1,7 @@
 package app.toque.core.machine
 
+import app.toque.core.protocol.Mcc
+
 /**
  * État complet et immuable de la machine, envoyé à l'interface ~10 fois par seconde.
  * [toMap]/[fromMap] servent au passage entre processus (Bundle Android).
@@ -59,6 +61,16 @@ data class Snapshot(
     val running: Boolean get() = state == JobState.RUNNING || state == JobState.STARTING || state == JobState.STOPPING
     val busy: Boolean get() = running || state == JobState.PAUSED || turboActive
     val hot: Boolean get() = hasSample && actualTempC >= Limits.HOT_C
+
+    /**
+     * La base ne mesure rien en dessous de son premier palier (37 °C) : elle envoie alors 0, puis
+     * passe directement à 37. Un 0 reçu veut donc dire « moins de 37 °C », pas « 0 °C ». Seul ce 0
+     * est concerné : la base simulée, elle, envoie de vraies valeurs basses (22 °C).
+     */
+    val tempBelowRange: Boolean get() = hasSample && actualTempC <= 0
+
+    /** Température à afficher, sans unité : « < 37 » tant que la base ne mesure rien, sinon la valeur. */
+    val tempText: String get() = if (tempBelowRange) "< ${Mcc.MIN_MEASURED_C}" else actualTempC.toString()
 
     fun toMap(): Map<String, Any> = linkedMapOf(
         "link" to link.name, "transportName" to transportName, "transportUp" to transportUp,

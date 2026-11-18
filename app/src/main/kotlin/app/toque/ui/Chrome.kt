@@ -105,7 +105,7 @@ class TopBar(private val a: MainActivity) : LinearLayout(a) {
         lid.visibility = if (s.hasSample && s.lidOpen) View.VISIBLE else View.GONE
         if (s.hasSample) {
             temp.visibility = View.VISIBLE
-            Ui.chipText(temp).text = "${s.actualTempC} °C"
+            Ui.chipText(temp).text = "${s.tempText} °C"
             val col = if (s.actualTempC >= 40) Ui.tempColor(s.actualTempC) else Ui.TEXT2
             Ui.chipText(temp).setTextColor(col)
             (temp.getChildAt(0) as Icon).color = col
