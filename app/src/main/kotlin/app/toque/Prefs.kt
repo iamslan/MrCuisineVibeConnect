@@ -69,9 +69,13 @@ class Prefs(context: Context) {
             p.edit().putBoolean("requireBowl", v).commit()
         }
 
-    /** Capteur du bol lu à l'envers (bases qui signalent « bol » quand il est retiré). */
+    /**
+     * Capteur du bol lu à l'envers (bases qui signalent « bol » quand il est retiré).
+     * Activé par défaut dans ce fork : c'est le cas de ce robot (firmware de base 4922), comme des
+     * SKMC 1200 B2 et C3 et du SKMC 1100 A1 signalés en amont.
+     */
     var invertBowl: Boolean
-        get() = p.getBoolean("invertBowl", false)
+        get() = p.getBoolean("invertBowl", true)
         set(v) {
             p.edit().putBoolean("invertBowl", v).commit()
         }

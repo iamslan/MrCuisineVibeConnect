@@ -109,7 +109,10 @@ class MachineService : Service() {
         }
         val l = MachineLoop(
             transportFactory = factory,
-            config = ControllerConfig(requireBowl = prefs.requireBowl, invertBowl = prefs.invertBowl, hotRamp = prefs.hotRamp),
+            // L'inversion du capteur du bol ne concerne que la vraie base : la base simulée et le jumeau
+            // signalent le bol dans le bon sens.
+            config = ControllerConfig(requireBowl = prefs.requireBowl,
+                invertBowl = prefs.invertBowl && mode == Prefs.Mode.HARDWARE, hotRamp = prefs.hotRamp),
             onSnapshot = { s -> main.post { publish(s) } },
             onEvent = { e -> main.post { broadcastEvent(e) } },
             log = { line -> log.write("machine", line) },
