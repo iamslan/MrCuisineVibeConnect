@@ -29,6 +29,7 @@ import app.toque.core.machine.Snapshot
 import app.toque.core.machine.Verdict
 import app.toque.recipes.LidlSync
 import app.toque.recipes.SyncService
+import app.toque.ui.screens.SetupScreen
 import app.toque.ui.screens.HomeScreen
 import app.toque.ui.screens.SettingsScreen
 import java.text.SimpleDateFormat
@@ -95,6 +96,9 @@ class MainActivity : Activity() {
         if (reopenSettings) {
             reopenSettings = false
             push(SettingsScreen(this))
+        } else if (prefs.mode == Prefs.Mode.HARDWARE && !prefs.setupDone) {
+            // Première fois sur la vraie machine : capteur du bol et bouton rotatif de ce robot.
+            push(SetupScreen(this))
         }
     }
 

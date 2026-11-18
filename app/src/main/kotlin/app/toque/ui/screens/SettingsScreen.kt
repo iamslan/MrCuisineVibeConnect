@@ -177,6 +177,7 @@ class SettingsScreen(a: MainActivity) : Screen(a) {
         // ---- Outils
         val tools = section(right, tr("Outils"), Icon.Kind.SETTINGS)
         tools.addView(link(tr("Diagnostic de la base moteur")) { a.push(DiagnosticsScreen(a)) })
+        tools.addView(link(tr("Réglage du robot")) { a.push(SetupScreen(a)) })
         tools.addView(link(tr("Bouton rotatif")) { a.push(KnobScreen(a)) })
         tools.addView(link(tr("Journal")) { a.push(LogScreen(a)) })
         tools.addView(link(tr("Paramètres Android")) { a.openAndroidSettings() })
@@ -320,7 +321,12 @@ class SettingsScreen(a: MainActivity) : Screen(a) {
         a.prefs.bootLaunch = true
         a.prefs.twinHost = host.text.toString().trim().ifEmpty { "127.0.0.1" }
         a.prefs.twinPort = port.text.toString().trim().toIntOrNull() ?: 8765
-        a.machine.reconfigure { v -> if (v.ok) a.toast(tr("Mode : %s", mode.label), Ui.OK) else a.refusal(v) }
+        a.machine.reconfigure { v ->
+            if (!v.ok) a.refusal(v)
+            // Premier passage sur la vraie machine : on règle Toque sur ce robot.
+            else if (mode == Prefs.Mode.HARDWARE && !a.prefs.setupDone) a.push(SetupScreen(a))
+            else a.toast(tr("Mode : %s", mode.label), Ui.OK)
+        }
         a.refreshTitle()
     }
 

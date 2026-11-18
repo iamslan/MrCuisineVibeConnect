@@ -169,6 +169,13 @@ class Prefs(context: Context) {
             p.edit().putBoolean("returnBubble", v).commit()
         }
 
+    /** Réglage du robot (capteur du bol, bouton rotatif) déjà fait, ou remis à plus tard par l'utilisateur. */
+    var setupDone: Boolean
+        get() = p.getBoolean("setupDone", false)
+        set(v) {
+            p.edit().putBoolean("setupDone", v).commit()
+        }
+
     /** Ouvrir Toque au démarrage du robot (désactivé par « Revenir à l'appli d'origine »). */
     var bootLaunch: Boolean
         get() = p.getBoolean("bootLaunch", true)
