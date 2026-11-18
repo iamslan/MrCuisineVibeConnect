@@ -144,15 +144,26 @@ class OnlineSync(private val context: Context, private val prefs: Prefs, private
             val url = repo.get(id)?.image ?: continue
             if (url.startsWith("http") && repo.imageFile(url) == null) missing += url
         }
-        var inARow = 0
+        // Les photos viennent de plusieurs serveurs (officielles, communauté). Un serveur en panne
+        // (certificat expiré, par exemple) est laissé de côté après 5 échecs de suite, sans priver
+        // de leurs photos les recettes servies par les autres.
+        val inARow = HashMap<String, Int>()
+        val down = HashSet<String>()
         for ((i, url) in missing.withIndex()) {
+            val host = try { URL(url).host.orEmpty() } catch (_: Exception) { "" }
+            if (host in down) continue
             progress(tr("Photos : %d / %d", i + 1, missing.size))
             try {
                 savePhoto(url)
-                inARow = 0
+                inARow[host] = 0
             } catch (e: IOException) {
-                log.write("synchro", "photo $url : ${e.message}")
-                if (++inARow >= 5) return
+                val n = (inARow[host] ?: 0) + 1
+                inARow[host] = n
+                if (n <= 2) log.write("synchro", "photo $url : ${e.message}")
+                if (n >= 5) {
+                    down += host
+                    log.write("synchro", "photos de $host laissées pour la prochaine synchro (5 échecs de suite)")
+                }
             }
             pause(150)
         }
