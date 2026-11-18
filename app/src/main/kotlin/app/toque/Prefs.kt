@@ -169,6 +169,42 @@ class Prefs(context: Context) {
             p.edit().putBoolean("returnBubble", v).commit()
         }
 
+    // ---- Lien domotique (Home Assistant…), voir app.toque.link.HomeLinkServer
+
+    /** Serveur local en lecture seule, désactivé par défaut. */
+    var linkEnabled: Boolean
+        get() = p.getBoolean("linkEnabled", false)
+        set(v) {
+            p.edit().putBoolean("linkEnabled", v).commit()
+        }
+
+    var linkPort: Int
+        get() = p.getInt("linkPort", app.toque.core.link.HomeLink.DEFAULT_PORT)
+        set(v) {
+            p.edit().putInt("linkPort", v).commit()
+        }
+
+    /** Identifiant stable de ce robot sur le réseau (créé à la première activation). */
+    var linkId: String
+        get() = p.getString("linkId", "") ?: ""
+        set(v) {
+            p.edit().putString("linkId", v).commit()
+        }
+
+    /** Empreintes (SHA-256) des jetons des appareils associés : le jeton lui-même n'est pas gardé. */
+    var linkTokens: Set<String>
+        get() = HashSet(p.getStringSet("linkTokens", emptySet()) ?: emptySet())
+        set(v) {
+            p.edit().putStringSet("linkTokens", HashSet(v)).commit()
+        }
+
+    /** Le réglage du robot a montré que le capteur du bol ne répond pas : on ne publie pas sa valeur. */
+    var bowlSensorBad: Boolean
+        get() = p.getBoolean("bowlSensorBad", false)
+        set(v) {
+            p.edit().putBoolean("bowlSensorBad", v).commit()
+        }
+
     /** Réglage du robot (capteur du bol, bouton rotatif) déjà fait, ou remis à plus tard par l'utilisateur. */
     var setupDone: Boolean
         get() = p.getBoolean("setupDone", false)

@@ -500,5 +500,20 @@
   "Vous pouvez remettre le bol en place.": "You can put the bowl back.",
   "Tablette %s, système %s": "Tablet %s, system %s",
   "appli d'origine %s": "stock app %s",
-  "base moteur %d": "motor base %d"
+  "base moteur %d": "motor base %d",
+  "Lien domotique": "Home link",
+  "Montre l'état du robot, les étapes de cuisson et les recettes à Home Assistant, sur le réseau de la maison. Lecture seule : rien ne peut démarrer ou arrêter le robot à distance.": "Shows the robot's state, cooking steps and recipes to Home Assistant, on the home network. Read-only: nothing can start or stop the robot remotely.",
+  "Activer le lien domotique": "Enable the home link",
+  "Le lien domotique n'a pas pu démarrer (port occupé)": "The home link could not start (port in use)",
+  "Désactivé.": "Off.",
+  "pas de réseau pour l'instant": "no network for now",
+  "Adresse : %s": "Address: %s",
+  "Appareils associés : %d": "Paired devices: %d",
+  "Associer un appareil": "Pair a device",
+  "Dissocier tous les appareils": "Unpair all devices",
+  "Home Assistant et les autres appareils associés n'auront plus accès au robot tant qu'ils ne seront pas associés à nouveau.": "Home Assistant and the other paired devices will lose access to the robot until they are paired again.",
+  "Dissocier": "Unpair",
+  "Code d'association": "Pairing code",
+  "À saisir dans Home Assistant. Valable 5 minutes, pour un seul appareil.": "Enter it in Home Assistant. Valid for 5 minutes, for one device.",
+  "Appareil associé : %s": "Device paired: %s"
 }

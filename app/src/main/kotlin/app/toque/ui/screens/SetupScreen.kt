@@ -219,18 +219,21 @@ class SetupScreen(a: MainActivity) : Screen(a) {
             lines += tr("Capteur du bol : étape passée, réglage inchangé.")
         } else when (RobotSetup.bowlSensor(inBowl, outBowl)) {
             BowlSensor.NORMAL -> {
+                a.prefs.bowlSensorBad = false
                 a.prefs.invertBowl = false
                 a.prefs.requireBowl = true
                 lines += tr("Capteur du bol : fonctionne, dans le sens habituel.")
                 bowlNote = tr("Toque refusera désormais de démarrer sans le bol (Réglages › Sécurité pour changer).")
             }
             BowlSensor.INVERTED -> {
+                a.prefs.bowlSensorBad = false
                 a.prefs.invertBowl = true
                 a.prefs.requireBowl = true
                 lines += tr("Capteur du bol : fonctionne, signalé à l'envers sur ce robot. Toque en tient compte.")
                 bowlNote = tr("Toque refusera désormais de démarrer sans le bol (Réglages › Sécurité pour changer).")
             }
             BowlSensor.UNUSABLE -> {
+                a.prefs.bowlSensorBad = true
                 a.prefs.requireBowl = false
                 lines += tr("Capteur du bol : le signal n'a pas changé en retirant le bol. Toque ne s'y fiera pas.")
             }

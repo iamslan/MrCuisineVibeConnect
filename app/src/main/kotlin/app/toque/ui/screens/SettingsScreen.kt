@@ -165,6 +165,24 @@ class SettingsScreen(a: MainActivity) : Screen(a) {
         lidl.addView(Ui.text(c, tr("En plus des recettes officielles du connect : celles du Monsieur Cuisine smart, et celles de la communauté notées au moins %s sur 5 par au moins %d personnes. Prend effet à la prochaine synchronisation.",
             "4,5", McOnline.MIN_MEMBER_RATINGS), 15f, Ui.TEXT3).apply { setLineSpacing(0f, 1.1f) }, Ui.lp(t = 6))
 
+        // ---- Lien domotique (Home Assistant…) : lecture seule, désactivé par défaut
+        val link = section(left, tr("Lien domotique"), Icon.Kind.LINK)
+        link.addView(Ui.text(c, tr("Montre l'état du robot, les étapes de cuisson et les recettes à Home Assistant, sur le réseau de la maison. Lecture seule : rien ne peut démarrer ou arrêter le robot à distance."),
+            16f, Ui.TEXT2).apply { setLineSpacing(0f, 1.15f) })
+        homeLinkText = Ui.text(c, "", 16f, Ui.TEXT2).apply { setLineSpacing(0f, 1.15f) }
+        linkButtons = Ui.vertical(c)
+        link.addView(toggle(tr("Activer le lien domotique"), a.prefs.linkEnabled) { on ->
+            a.prefs.linkEnabled = on
+            val server = a.app.homeLink
+            if (on) {
+                if (!server.start()) a.toast(tr("Le lien domotique n'a pas pu démarrer (port occupé)"), Ui.WARN)
+            } else server.stop()
+            renderLink()
+        }, Ui.lp(t = 10))
+        link.addView(homeLinkText, Ui.lp(t = 8))
+        link.addView(linkButtons, Ui.lp(t = 4))
+        renderLink()
+
         // ---- Mises à jour
         val updates = section(left, tr("Mises à jour"), Icon.Kind.INFO)
         updText = Ui.text(c, "", 16f, Ui.TEXT2).apply { setLineSpacing(0f, 1.15f) }
@@ -187,6 +205,54 @@ class SettingsScreen(a: MainActivity) : Screen(a) {
             "Projet indépendant, non affilié à Lidl ni à SilverCrest.", version), 14f, Ui.TEXT3).apply { setLineSpacing(0f, 1.1f) }, Ui.lp(t = 12))
 
         return Ui.scroll(c, col)
+    }
+
+    private lateinit var homeLinkText: TextView
+    private lateinit var linkButtons: LinearLayout
+
+    private fun renderLink() {
+        val server = a.app.homeLink
+        linkButtons.removeAllViews()
+        if (!server.running) {
+            homeLinkText.text = tr("Désactivé.")
+            return
+        }
+        val where = server.addresses().joinToString("  ·  ").ifEmpty { tr("pas de réseau pour l'instant") }
+        homeLinkText.text = tr("Adresse : %s", where) + "\n" + tr("Appareils associés : %d", server.pairedCount)
+        linkButtons.addView(Ui.button(c, tr("Associer un appareil"), Ui.Style.SECONDARY, Icon.Kind.LINK, height = 52) { showPairingCode() },
+            Ui.lp(Ui.WRAP, Ui.WRAP, t = 6))
+        if (server.pairedCount > 0) linkButtons.addView(Ui.button(c, tr("Dissocier tous les appareils"), Ui.Style.GHOST, height = 52) {
+            a.confirm(tr("Dissocier tous les appareils"), tr("Home Assistant et les autres appareils associés n'auront plus accès au robot tant qu'ils ne seront pas associés à nouveau."),
+                tr("Dissocier"), danger = true) {
+                server.unpairAll()
+                renderLink()
+            }
+        }, Ui.lp(Ui.WRAP, Ui.WRAP, t = 8))
+    }
+
+    /** Code à saisir dans Home Assistant : affiché en grand, valable 5 minutes, fermé dès qu'il a servi. */
+    private fun showPairingCode() {
+        val server = a.app.homeLink
+        val code = server.openPairing()
+        val card = Ui.card(c, 28f, Ui.SURFACE2)
+        card.setPadding(Ui.u(32), Ui.u(28), Ui.u(32), Ui.u(26))
+        card.gravity = Gravity.CENTER_HORIZONTAL
+        card.addView(Ui.text(c, tr("Code d'association"), 26f, Ui.TEXT, Ui.MEDIUM))
+        card.addView(Ui.text(c, code.substring(0, 3) + " " + code.substring(3), 84f, Ui.ACCENT, Ui.THIN), Ui.lp(Ui.WRAP, Ui.WRAP, t = 10))
+        card.addView(Ui.text(c, tr("À saisir dans Home Assistant. Valable 5 minutes, pour un seul appareil."), 18f, Ui.TEXT2)
+            .apply { gravity = Gravity.CENTER }, Ui.lp(Ui.MATCH, Ui.WRAP, t = 8, b = 22))
+        card.addView(Ui.button(c, tr("Fermer"), Ui.Style.GHOST, height = 60) {
+            server.pairing.close()
+            server.onPaired = null
+            a.closeOverlay()
+        })
+        server.onPaired = { name ->
+            server.onPaired = null
+            a.closeOverlay()
+            a.toast(tr("Appareil associé : %s", name.ifEmpty { "Home Assistant" }), Ui.OK)
+            renderLink()
+        }
+        a.showOverlay(card, 620, dismissOnScrim = false)
     }
 
     private fun section(parent: LinearLayout, title: String, icon: Icon.Kind): LinearLayout {

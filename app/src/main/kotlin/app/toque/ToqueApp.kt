@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Process
 import app.toque.core.i18n.I18n
+import app.toque.link.HomeLinkServer
 import app.toque.machine.MachineClient
 import app.toque.recipes.RecipeRepo
 import app.toque.ui.MainActivity
@@ -21,6 +22,8 @@ class ToqueApp : Application() {
         private set
     val machine: MachineClient by lazy { MachineClient(this) }
     val recipes: RecipeRepo by lazy { RecipeRepo(this) }
+    /** Lien domotique (lecture seule), démarré seulement s'il est activé dans les réglages. */
+    val homeLink: HomeLinkServer by lazy { HomeLinkServer(this) }
 
     override fun onCreate() {
         super.onCreate()
@@ -55,6 +58,7 @@ class ToqueApp : Application() {
         }
         log.write("interface", "démarrage")
         TimeSync.start(this, prefs, log)
+        if (prefs.linkEnabled) homeLink.start()
     }
 
     private fun isMainProcess(): Boolean {
